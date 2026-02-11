@@ -6,11 +6,10 @@
     <title>Admin Business | La Hielera</title>
     
     <link rel="icon" type="image/png" href="favicon.png">
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
     <style>
         body { background-color: #0a0a0a; color: white; font-family: 'Inter', sans-serif; }
         .bg-matte { background-color: #141414; border: 1px solid #333; }
@@ -18,22 +17,17 @@
         .hidden { display: none !important; }
         .stat-card { background: #111; border: 1px solid #222; padding: 1.25rem; border-radius: 1.5rem; text-align: center; transition: all 0.3s; }
         .stat-card:hover { border-color: #f97316; transform: translateY(-2px); }
-        /* Scrollbar personalizado para mantener la estética oscura */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #f97316; }
     </style>
 </head>
 <body class="p-4 md:p-10">
 
     <div id="auth-overlay">
         <div class="bg-[#1a1a1a] p-8 rounded-3xl border border-gray-800 text-center shadow-2xl w-full max-w-xs">
-            <div class="text-orange-500 text-4xl mb-4"><i class="fa-solid fa-lock"></i></div>
-            <h2 class="text-white font-black uppercase tracking-widest mb-6 text-sm">Panel de Control</h2>
+            <div class="text-orange-500 text-4xl mb-4"><i class="fa-solid fa-shield-halved"></i></div>
+            <h2 class="text-white font-black uppercase tracking-widest mb-6 text-sm">Acceso Privado</h2>
             <input type="password" id="pin-input" placeholder="****" class="bg-black border border-gray-700 p-4 rounded-xl text-center text-2xl tracking-[1rem] w-full mb-4 outline-none focus:border-orange-500 text-white transition-all">
             <button id="btn-entrar" class="block w-full bg-orange-500 text-black font-black py-4 rounded-xl hover:bg-orange-400 transition transform active:scale-95">
-                ACCEDER
+                DESBLOQUEAR
             </button>
         </div>
     </div>
@@ -43,41 +37,41 @@
         <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
             <div>
                 <h1 class="text-3xl font-black uppercase italic tracking-tighter text-white">
-                    <i class="fa-solid fa-chart-pie text-orange-500 mr-2"></i>Métricas de Acceso
+                    <i class="fa-solid fa-chart-line text-orange-500 mr-2"></i>Control de Flujo
                 </h1>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Gestión Estratégica | La Hielera</p>
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Inteligencia de Datos | La Hielera</p>
             </div>
             <button id="btn-excel" class="bg-green-600 hover:bg-green-700 text-white font-black py-4 px-8 rounded-2xl transition flex items-center gap-3 shadow-lg shadow-green-900/20 text-xs uppercase tracking-widest">
-                <i class="fa-solid fa-download text-lg"></i> Descargar Cierre
+                <i class="fa-solid fa-file-excel text-lg"></i> Exportar Cierre
             </button>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
             <div class="stat-card border-orange-500/40 bg-orange-500/5">
-                <p class="text-[10px] uppercase text-orange-500 font-black mb-1"><i class="fa-solid fa-users-viewfinder mr-1"></i> Hoy</p>
+                <p class="text-[10px] uppercase text-orange-500 font-black mb-1"><i class="fa-solid fa-bolt mr-1"></i> Hoy</p>
                 <p id="count-hoy" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Semana</p>
+                <p class="text-[10px] uppercase text-gray-500 font-black mb-1"><i class="fa-solid fa-calendar-week mr-1"></i> Semana</p>
                 <p id="count-semana" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Mes</p>
+                <p class="text-[10px] uppercase text-gray-500 font-black mb-1"><i class="fa-solid fa-calendar-days mr-1"></i> Mes</p>
                 <p id="count-mes" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Año</p>
+                <p class="text-[10px] uppercase text-gray-500 font-black mb-1"><i class="fa-solid fa-calendar mr-1"></i> Año</p>
                 <p id="count-año" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card bg-white text-black border-none">
-                <p class="text-[10px] uppercase font-black mb-1">Total Histórico</p>
+                <p class="text-[10px] uppercase font-black mb-1"><i class="fa-solid fa-database mr-1"></i> Histórico</p>
                 <p id="count-total" class="text-4xl font-black">0</p>
             </div>
         </div>
 
-        <div class="mb-6 relative">
-            <i class="fa-solid fa-search absolute left-5 top-1/2 -translate-y-1/2 text-gray-500"></i>
-            <input type="text" id="buscador" placeholder="Filtrar por cualquier dato del cliente..." 
+        <div class="mb-6 relative group">
+            <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-orange-500 transition-colors"></i>
+            <input type="text" id="buscador" placeholder="Buscar por nombre, apellido o cédula de identidad..." 
                 class="w-full bg-[#111] border border-gray-800 text-white text-sm rounded-2xl py-5 pl-14 pr-6 outline-none focus:border-orange-500 transition-all shadow-2xl">
         </div>
 
@@ -86,10 +80,10 @@
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-[#1a1a1a] text-[10px] uppercase text-gray-400 tracking-[0.2em] border-b border-gray-800">
                         <tr>
-                            <th class="p-6">Fecha / Hora</th>
-                            <th class="p-6">Cédula</th>
-                            <th class="p-6">Cliente</th>
-                            <th class="p-6 text-orange-500">WhatsApp</th>
+                            <th class="p-6"><i class="fa-regular fa-clock mr-2"></i>Registro</th>
+                            <th class="p-6"><i class="fa-regular fa-id-card mr-2"></i>Cédula</th>
+                            <th class="p-6"><i class="fa-regular fa-user mr-2"></i>Cliente</th>
+                            <th class="p-6"><i class="fa-brands fa-whatsapp mr-2 text-green-500"></i>WhatsApp</th>
                         </tr>
                     </thead>
                     <tbody id="lista-asistencias" class="divide-y divide-gray-800 text-sm"></tbody>
@@ -117,20 +111,23 @@
         let datosExcelRaw = [];
 
         // LÓGICA DE PIN
+        const btnEntrar = document.getElementById('btn-entrar');
+        const pinInput = document.getElementById('pin-input');
+
         const acceso = () => {
-            if(document.getElementById('pin-input').value === "1234") {
+            if(pinInput.value === "1234") {
                 document.getElementById('auth-overlay').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             } else { 
-                alert("PIN INCORRECTO");
-                document.getElementById('pin-input').value = "";
+                alert("ACCESO DENEGADO");
+                pinInput.value = "";
             }
         };
 
-        document.getElementById('btn-entrar').onclick = acceso;
-        document.getElementById('pin-input').onkeypress = (e) => { if(e.key === 'Enter') acceso(); };
+        btnEntrar.onclick = acceso;
+        pinInput.onkeypress = (e) => { if(e.key === 'Enter') acceso(); };
 
-        // FIREBASE REALTIME
+        // FIREBASE DATA
         const q = query(collection(db, "asistencias"), orderBy("timestamp", "desc"));
 
         onSnapshot(q, (snapshot) => {
@@ -142,7 +139,7 @@
             inicioSemana.setDate(ahora.getDate() - ahora.getDay());
             inicioSemana.setHours(0,0,0,0);
 
-            const hoyStr = ahora.toLocaleDateString();
+            const hoyStr = new Date().toLocaleDateString();
             const mesAct = ahora.getMonth();
             const añoAct = ahora.getFullYear();
 
@@ -181,36 +178,39 @@
                         <span class="${d.fecha === hoy ? 'text-orange-500 font-black' : ''}">${d.fecha}</span><br>${d.hora}
                     </td>
                     <td class="p-6 font-mono text-gray-400">${d.cedula || "---"}</td>
-                    <td class="p-6 font-black uppercase">${d.nombre} ${d.apellido}</td>
-                    <td class="p-6 text-orange-500 font-bold font-mono">${d.telefono}</td>
+                    <td class="p-6 font-black uppercase tracking-tight">${d.nombre} ${d.apellido}</td>
+                    <td class="p-6 text-orange-500 font-bold">
+                        <a href="https://wa.me/${d.telefono.replace(/\+/g,'')}" target="_blank" class="hover:underline">
+                            ${d.telefono}
+                        </a>
+                    </td>
                 </tr>`;
             });
         }
 
-        // BUSCADOR
+        // BUSCADOR EN TIEMPO REAL
         document.getElementById('buscador').oninput = (e) => {
             const t = e.target.value.toLowerCase();
             const f = todosLosRegistros.filter(r => 
                 `${r.nombre} ${r.apellido}`.toLowerCase().includes(t) || 
-                (r.cedula && r.cedula.toString().includes(t)) ||
-                (r.telefono && r.telefono.includes(t))
+                (r.cedula && r.cedula.toString().includes(t))
             );
             renderizarTabla(f);
         };
 
-        // EXCEL
+        // EXCEL PROFESIONAL
         document.getElementById('btn-excel').onclick = () => {
             if(datosExcelRaw.length === 0) return alert("Sin datos");
             const ws = XLSX.utils.aoa_to_sheet([
-                ["LA HIELERA - DASHBOARD"],
-                [`FECHA: ${new Date().toLocaleString()}`],
+                ["LA HIELERA - DASHBOARD ADMINISTRATIVO"],
+                [`REPORTE GENERADO EL: ${new Date().toLocaleString()}`],
                 [],
-                ["FECHA", "HORA", "CÉDULA", "NOMBRE", "WHATSAPP"],
+                ["FECHA", "HORA", "CÉDULA", "NOMBRE COMPLETO", "WHATSAPP"],
                 ...datosExcelRaw
             ]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Asistencias");
-            XLSX.writeFile(wb, `Reporte_Hielera.xlsx`);
+            XLSX.writeFile(wb, `Cierre_Hielera_${new Date().toLocaleDateString()}.xlsx`);
         };
     </script>
 </body>
