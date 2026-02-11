@@ -5,34 +5,48 @@
     <title>Admin Asistencias | La Hielera</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { background-color: #0a0a0a; color: #white; font-family: sans-serif; }
+        .bg-matte { background-color: #141414; border: 1px solid #333; }
+        #auth-overlay { background: rgba(0,0,0,0.95); position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; }
+    </style>
 </head>
-<body class="bg-[#0a0a0a] text-white p-6 md:p-10 font-sans">
-    <div class="max-w-6xl mx-auto">
+<body class="p-6 md:p-10">
+
+    <div id="auth-overlay">
+        <div class="bg-[#1a1a1a] p-8 rounded-3xl border border-gray-800 text-center shadow-2xl">
+            <h2 class="text-orange-500 font-black uppercase tracking-tighter mb-4 text-xl">Acceso Restringido</h2>
+            <input type="password" id="pin-input" placeholder="PIN de 4 dígitos" class="bg-black border border-gray-700 p-4 rounded-xl text-center text-2xl tracking-widest w-48 mb-4 outline-none focus:border-orange-500 text-white">
+            <button onclick="verificarPIN()" class="block w-full bg-orange-500 text-black font-black py-3 rounded-xl hover:bg-orange-400 transition">ENTRAR</button>
+        </div>
+    </div>
+
+    <div id="main-content" class="max-w-6xl mx-auto hidden">
         
         <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
             <div class="text-center md:text-left">
-                <h1 class="text-4xl font-black italic uppercase italic tracking-tighter text-white">Flujo de Clientes</h1>
-                <p id="contador" class="text-orange-500 font-bold text-lg mt-1 uppercase tracking-widest">Total: 0 personas</p>
+                <h1 class="text-4xl font-black italic uppercase tracking-tighter text-white">Control de Flujo</h1>
+                <div class="flex gap-4 mt-2">
+                    <p id="contador-hoy" class="bg-orange-500/10 text-orange-500 border border-orange-500/20 px-3 py-1 rounded-full font-bold text-xs uppercase">Hoy: 0 personas</p>
+                    <p id="contador-total" class="bg-gray-800 text-gray-400 px-3 py-1 rounded-full font-bold text-xs uppercase">Histórico: 0</p>
+                </div>
             </div>
             
-            <button onclick="descargarExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-2xl transition flex items-center gap-2 shadow-lg shadow-green-900/20">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                DESCARGAR CIERRE DEL DÍA (EXCEL)
+            <button onclick="descargarExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-2xl transition flex items-center gap-2 shadow-lg shadow-green-900/20 text-sm">
+                DESCARGAR CIERRE (EXCEL)
             </button>
         </div>
 
-        <div class="bg-[#141414] rounded-[2rem] overflow-hidden border border-gray-800 shadow-2xl">
+        <div class="bg-matte rounded-[2rem] overflow-hidden shadow-2xl">
             <table class="w-full text-left border-collapse">
                 <thead class="bg-[#1f1f1f] text-[10px] uppercase text-gray-500 tracking-widest border-b border-gray-800">
                     <tr>
-                        <th class="p-5">Fecha / Hora</th>
+                        <th class="p-5">Hora de Entrada</th>
                         <th class="p-5">Nombre Completo</th>
                         <th class="p-5">WhatsApp</th>
                     </tr>
                 </thead>
-                <tbody id="lista-asistencias" class="divide-y divide-gray-800 text-sm">
+                <tbody id="lista-asistencias" class="divide-y divide-gray-800 text-sm text-white">
                     </tbody>
             </table>
         </div>
@@ -55,18 +69,35 @@
         const db = getFirestore(app);
         let datosParaExcel = [];
 
+        // LÓGICA DE PIN
+        window.verificarPIN = () => {
+            const pin = document.getElementById('pin-input').value;
+            if(pin === "2026") { // AQUÍ CAMBIAS TU PIN
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.getElementById('main-content').classList.remove('hidden');
+            } else {
+                alert("PIN INCORRECTO");
+            }
+        };
+
         const q = query(collection(db, "asistencias"), orderBy("timestamp", "desc"));
 
         onSnapshot(q, (snapshot) => {
             const list = document.getElementById('lista-asistencias');
-            document.getElementById('contador').innerText = `Total: ${snapshot.size} personas registradas`;
+            const fechaHoy = new Date().toLocaleDateString();
+            
+            let personasHoy = 0;
             list.innerHTML = "";
-            datosParaExcel = []; // Reiniciamos el array para el Excel
+            datosParaExcel = [];
             
             snapshot.forEach(doc => {
                 const d = doc.data();
                 
-                // Guardamos en el array para el Excel con nombres de columna limpios
+                // Contar solo si la fecha del registro coincide con hoy
+                if(d.fecha === fechaHoy) {
+                    personasHoy++;
+                }
+
                 datosParaExcel.push({
                     "FECHA": d.fecha,
                     "HORA": d.hora,
@@ -77,27 +108,4 @@
 
                 list.innerHTML += `
                 <tr class="hover:bg-[#1c1c1c] transition-colors">
-                    <td class="p-5 text-gray-500 font-mono text-xs">${d.fecha} <br> <span class="text-orange-900">${d.hora}</span></td>
-                    <td class="p-5 font-bold uppercase tracking-tight text-white">${d.nombre} ${d.apellido}</td>
-                    <td class="p-5">
-                        <a href="https://wa.me/${d.telefono}" target="_blank" class="text-orange-500 font-bold hover:underline">${d.telefono}</a>
-                    </td>
-                </tr>`;
-            });
-        });
-
-        // Función para generar y descargar el archivo Excel
-        window.descargarExcel = () => {
-            if (datosParaExcel.length === 0) return alert("No hay datos para exportar.");
-
-            const fechaHoy = new Date().toLocaleDateString().replace(/\//g, '-');
-            const worksheet = XLSX.utils.json_to_sheet(datosParaExcel);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Asistencias");
-
-            // Descargar el archivo
-            XLSX.writeFile(workbook, `Cierre_LaHielera_${fechaHoy}.xlsx`);
-        };
-    </script>
-</body>
-</html>
+                    <td class="p-5 font-mono text-xs text-gray-400"><span class="${d.fecha ===
