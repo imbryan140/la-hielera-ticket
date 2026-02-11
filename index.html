@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La Hielera | Reclama tu Ticket</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+        .matte-card {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+        }
+        /* Transición suave para la aparición del formulario */
+        .animate-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6 font-sans text-white">
+
+    <div id="app" class="matte-card p-8 rounded-[2rem] shadow-2xl max-w-md w-full text-center backdrop-blur-md">
+        <img src="logo.png" alt="La Hielera" class="w-32 mx-auto mb-6">
+        
+        <div id="loading" class="text-gray-400">Validando ticket...</div>
+        
+        <div id="form-container" class="hidden animate-in">
+            <h1 class="text-3xl font-bold mb-2 text-white">¡Felicidades! 🧊</h1>
+            <p class="text-gray-400 mb-6 text-sm italic">Encontraste el ticket #<span id="ticket-id" class="text-orange-500 font-mono text-xl font-bold"></span></p>
+            
+            <div class="bg-[#262626] p-5 rounded-2xl mb-6 border-l-4 border-orange-500 shadow-inner">
+                <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Tu premio es:</p>
+                <h2 class="text-2xl font-bold text-white uppercase tracking-tight" id="premio-text"></h2>
+            </div>
+            
+            <div class="space-y-4">
+                <input type="text" id="nombre" placeholder="Nombre completo" 
+                    class="w-full bg-[#333] border-none p-4 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                
+                <input type="tel" id="telefono" placeholder="WhatsApp (Ej: +58...)" 
+                    class="w-full bg-[#333] border-none p-4 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                
+                <div class="flex items-center text-xs text-gray-400 text-left px-1">
+                    <input type="checkbox" id="tos" class="mr-2 h-4 w-4 rounded accent-orange-500 cursor-pointer"> 
+                    <label for="tos" class="cursor-pointer">
+                        Acepto los <button type="button" onclick="mostrarTOS()" class="text-orange-500 underline hover:text-orange-400">Términos y Condiciones</button>
+                    </label>
+                </div>
+
+                <button onclick="registrarTicket()" 
+                    class="w-full bg-orange-500 hover:bg-orange-600 text-black font-black py-4 rounded-xl transition duration-300 transform active:scale-95 shadow-lg shadow-orange-500/20 uppercase tracking-tighter">
+                    RECLAMAR AHORA
+                </button>
+            </div>
+        </div>
+
+        <div id="error-message" class="hidden text-orange-400 font-medium p-6 border border-orange-500/20 rounded-2xl bg-orange-500/5"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6y3u_6pmJkYm0tb3awnhrmWsgJrouUOQ",
+            authDomain: "la-hielera-ticket.firebaseapp.com",
+            projectId: "la-hielera-ticket",
+            storageBucket: "la-hielera-ticket.firebasestorage.app",
+            messagingSenderId: "1027341293744",
+            appId: "1:1027341293744:web:186bf82f009f9a7270c375"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const ticketId = urlParams.get('id');
+
+        // Función para mostrar Términos y Condiciones
+        window.mostrarTOS = () => {
+            alert(`TÉRMINOS Y CONDICIONES - LA HIELERA:\n\n` +
+            `1. Hallazgo: El premio es exclusivo para la primera persona que escanee y registre el ticket físico.\n` +
+            `2. Registro: Es obligatorio el uso de datos reales (Nombre y WhatsApp).\n` +
+            `3. Canje: Se debe presentar el ticket físico y la pantalla de éxito en tienda.\n` +
+            `4. Un solo uso: Una vez registrado, el código queda invalidado permanentemente.\n` +
+            `5. Caducidad: El premio debe canjearse en un periodo máximo de 48 horas.\n` +
+            `6. Verificación: Nos reservamos el derecho de anular premios si se detecta actividad fraudulenta.`);
+        };
+
+        async function init() {
+            if (!ticketId) {
+                showError("QR INVÁLIDO. Por favor, escanea un código real.");
+                return;
+            }
+            try {
+                const docRef = doc(db, "tickets", ticketId);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().status === "disponible") {
+                    document.getElementById('loading').classList.add('hidden');
+                    document.getElementById('form-container').classList.remove('hidden');
+                    document.getElementById('ticket-id').innerText = ticketId;
+                    document.getElementById('premio-text').innerText = docSnap.data().premio;
+                } else {
+                    showError("TICKET NO DISPONIBLE. Alguien más ya reclamó este premio.");
+                }
+            } catch (e) {
+                showError("ERROR DE CONEXIÓN. Revisa tu internet.");
+            }
+        }
+
+        window.registrarTicket = async () => {
+            const nombre = document.getElementById('nombre').value.trim();
+            const telefono = document.getElementById('telefono').value.trim();
+            const tos = document.getElementById('tos').checked;
+
+            if (!nombre || !telefono || !tos) {
+                alert("Por favor: Completa todos los campos y acepta los términos.");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, "tickets", ticketId);
+                await updateDoc(docRef, {
+                    nombre: nombre,
+                    telefono: telefono,
+                    status: "reclamado",
+                    fechaRegistro: new Date().toLocaleString()
+                });
+                alert("¡REGISTRADO CON ÉXITO! Toma captura de pantalla y ven a La Hielera con tu ticket físico.");
+                location.reload();
+            } catch (e) {
+                alert("Hubo un error al procesar el registro. Intenta de nuevo.");
+            }
+        };
+
+        function showError(msg) {
+            document.getElementById('loading').classList.add('hidden');
+            const errDiv = document.getElementById('error-message');
+            errDiv.innerText = msg;
+            errDiv.classList.remove('hidden');
+        }
+
+        init();
+    </script>
+</body>
+</html>

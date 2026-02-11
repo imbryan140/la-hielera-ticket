@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | La Hielera Business</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #0f0f0f; /* Negro profundo */
+            color: #ffffff;
+        }
+        .matte-card {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+        }
+        .table-row:hover {
+            background-color: #242424;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10 font-sans">
+    
+    <div class="max-w-6xl mx-auto">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl font-black uppercase tracking-tighter italic text-white">Panel de Control</h1>
+                <p class="text-orange-500 font-bold uppercase text-xs tracking-[0.3em]">Gestión de Premios 🧊</p>
+            </div>
+            <img src="logo.png" alt="Logo" class="h-16">
+        </div>
+
+        <div class="matte-card rounded-[2rem] overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-[#222] text-gray-500 text-[10px] uppercase tracking-widest border-b border-gray-800">
+                            <th class="p-5">ID Ticket</th>
+                            <th class="p-5">Ganador</th>
+                            <th class="p-5">WhatsApp</th>
+                            <th class="p-5">Premio</th>
+                            <th class="p-5">Estado</th>
+                            <th class="p-5 text-right">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-ganadores" class="divide-y divide-gray-800 text-sm">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <p class="text-center text-gray-600 text-[10px] mt-8 uppercase tracking-widest">
+            La Hielera © 2026 - Sistema de Validación Real-time
+        </p>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https
