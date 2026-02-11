@@ -4,66 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>La Hielera | Reclama tu Ticket</title>
+    
+    <link rel="icon" type="image/png" href="favicon.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
     <style>
         body {
-            background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('fondo.jpg');
+            background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('fondo.jpg');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
+            font-family: 'Inter', sans-serif;
         }
         .matte-card {
-            background-color: #1a1a1a;
-            border: 1px solid #333;
+            background-color: rgba(26, 26, 26, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        /* Transición suave para la aparición del formulario */
+        /* Animación de entrada */
         .animate-in {
-            animation: fadeIn 0.5s ease-out forwards;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        .loader {
+            border-top-color: #f97316;
+            animation: spinner 0.6s linear infinite;
+        }
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-6 font-sans text-white">
+<body class="flex items-center justify-center min-h-screen p-6 text-white">
 
-    <div id="app" class="matte-card p-8 rounded-[2rem] shadow-2xl max-w-md w-full text-center backdrop-blur-md">
-        <img src="logo.png" alt="La Hielera" class="w-32 mx-auto mb-6">
+    <div id="app" class="matte-card p-8 rounded-[2.5rem] shadow-2xl max-w-md w-full text-center backdrop-blur-xl">
+        <img src="logo.png" alt="La Hielera" class="w-28 mx-auto mb-6">
         
-        <div id="loading" class="text-gray-400">Validando ticket...</div>
+        <div id="loading" class="flex flex-col items-center gap-4">
+            <div class="loader w-10 h-10 border-4 border-gray-700 rounded-full"></div>
+            <p class="text-gray-400 text-sm font-bold uppercase tracking-widest">Validando Ticket...</p>
+        </div>
         
         <div id="form-container" class="hidden animate-in">
-            <h1 class="text-3xl font-bold mb-2 text-white">¡Felicidades! 🧊</h1>
-            <p class="text-gray-400 mb-6 text-sm italic">Encontraste el ticket #<span id="ticket-id" class="text-orange-500 font-mono text-xl font-bold"></span></p>
+            <h1 class="text-4xl font-black uppercase italic mb-2 tracking-tighter">¡Felicidades!</h1>
+            <p class="text-gray-400 mb-6 text-xs uppercase tracking-[0.2em] font-bold">
+                Ticket <span id="ticket-id" class="text-orange-500"></span> Detectado
+            </p>
             
-            <div class="bg-[#262626] p-5 rounded-2xl mb-6 border-l-4 border-orange-500 shadow-inner">
-                <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Tu premio es:</p>
-                <h2 class="text-2xl font-bold text-white uppercase tracking-tight" id="premio-text"></h2>
+            <div class="bg-orange-500/10 p-6 rounded-2xl mb-8 border border-orange-500/20 relative overflow-hidden">
+                <i class="fa-solid fa-gift absolute -right-4 -bottom-4 text-6xl text-orange-500/10 rotate-12"></i>
+                <p class="text-[10px] text-orange-500 uppercase font-black mb-1 tracking-widest">Tu premio exclusivo:</p>
+                <h2 class="text-2xl font-black text-white uppercase tracking-tight" id="premio-text"></h2>
             </div>
             
-            <div class="space-y-4">
-                <input type="text" id="nombre" placeholder="Nombre completo" 
-                    class="w-full bg-[#333] border-none p-4 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 outline-none transition">
+            <div class="space-y-4 text-left">
+                <div class="relative">
+                    <label class="text-[10px] uppercase text-gray-500 font-bold ml-2 tracking-widest">Nombre Completo</label>
+                    <div class="relative flex items-center mt-1">
+                        <i class="fa-solid fa-user absolute left-4 text-gray-500"></i>
+                        <input type="text" id="nombre" placeholder="¿A quién registramos?" 
+                            class="w-full bg-[#222] border-none p-4 pl-12 rounded-xl text-white placeholder-gray-600 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                    </div>
+                </div>
                 
-                <input type="tel" id="telefono" placeholder="WhatsApp (Ej: +58...)" 
-                    class="w-full bg-[#333] border-none p-4 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                <div class="relative">
+                    <label class="text-[10px] uppercase text-gray-500 font-bold ml-2 tracking-widest">WhatsApp</label>
+                    <div class="relative flex items-center mt-1">
+                        <i class="fa-brands fa-whatsapp absolute left-4 text-green-500 text-lg"></i>
+                        <input type="tel" id="telefono" placeholder="Ej: 04121234567" 
+                            class="w-full bg-[#222] border-none p-4 pl-12 rounded-xl text-white placeholder-gray-600 focus:ring-2 focus:ring-orange-500 outline-none transition">
+                    </div>
+                </div>
                 
-                <div class="flex items-center text-xs text-gray-400 text-left px-1">
-                    <input type="checkbox" id="tos" class="mr-2 h-4 w-4 rounded accent-orange-500 cursor-pointer"> 
-                    <label for="tos" class="cursor-pointer">
-                        Acepto los <button type="button" onclick="mostrarTOS()" class="text-orange-500 underline hover:text-orange-400">Términos y Condiciones</button>
+                <div class="flex items-start text-[11px] text-gray-400 text-left px-1 py-2">
+                    <input type="checkbox" id="tos" class="mt-0.5 mr-3 h-4 w-4 rounded accent-orange-500 cursor-pointer"> 
+                    <label for="tos" class="cursor-pointer leading-tight">
+                        Confirmo que tengo el ticket físico y acepto los 
+                        <button type="button" onclick="mostrarTOS()" class="text-orange-500 font-bold underline">Términos del Club</button>
                     </label>
                 </div>
 
-                <button onclick="registrarTicket()" 
-                    class="w-full bg-orange-500 hover:bg-orange-600 text-black font-black py-4 rounded-xl transition duration-300 transform active:scale-95 shadow-lg shadow-orange-500/20 uppercase tracking-tighter">
-                    RECLAMAR AHORA
+                <button onclick="registrarTicket()" id="btn-claim"
+                    class="w-full bg-orange-500 hover:bg-orange-600 text-black font-black py-5 rounded-2xl transition duration-300 transform active:scale-95 shadow-xl shadow-orange-500/20 uppercase tracking-widest text-sm flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-trophy"></i> RECLAMAR MI PREMIO
                 </button>
             </div>
         </div>
 
-        <div id="error-message" class="hidden text-orange-400 font-medium p-6 border border-orange-500/20 rounded-2xl bg-orange-500/5"></div>
+        <div id="error-message" class="hidden animate-in">
+            <div class="text-orange-500 text-5xl mb-4"><i class="fa-solid fa-circle-exclamation"></i></div>
+            <div id="error-text" class="text-orange-400 font-bold p-6 border border-orange-500/20 rounded-2xl bg-orange-500/5 uppercase text-xs tracking-widest"></div>
+            <button onclick="location.reload()" class="mt-6 text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em] hover:text-white transition">Reintentar Escaneo</button>
+        </div>
     </div>
 
     <script type="module">
@@ -85,20 +121,17 @@
         const urlParams = new URLSearchParams(window.location.search);
         const ticketId = urlParams.get('id');
 
-        // Función para mostrar Términos y Condiciones
         window.mostrarTOS = () => {
-            alert(`TÉRMINOS Y CONDICIONES - LA HIELERA:\n\n` +
-            `1. Hallazgo: El premio es exclusivo para la primera persona que escanee y registre el ticket físico.\n` +
-            `2. Registro: Es obligatorio el uso de datos reales (Nombre y WhatsApp).\n` +
-            `3. Canje: Se debe presentar el ticket físico y la pantalla de éxito en tienda.\n` +
-            `4. Un solo uso: Una vez registrado, el código queda invalidado permanentemente.\n` +
-            `5. Caducidad: El premio debe canjearse en un periodo máximo de 48 horas.\n` +
-            `6. Verificación: Nos reservamos el derecho de anular premios si se detecta actividad fraudulenta.`);
+            alert(`REGLAMENTO LA HIELERA:\n\n` +
+            `• El ticket físico es indispensable para el canje.\n` +
+            `• Los datos deben ser reales o el premio será anulado.\n` +
+            `• Tienes 48 horas para reclamar el premio en tienda.\n` +
+            `• Un ticket solo puede ser registrado una vez.`);
         };
 
         async function init() {
             if (!ticketId) {
-                showError("QR INVÁLIDO. Por favor, escanea un código real.");
+                showError("QR NO VÁLIDO. Por favor, escanea un código oficial.");
                 return;
             }
             try {
@@ -108,13 +141,13 @@
                 if (docSnap.exists() && docSnap.data().status === "disponible") {
                     document.getElementById('loading').classList.add('hidden');
                     document.getElementById('form-container').classList.remove('hidden');
-                    document.getElementById('ticket-id').innerText = ticketId;
+                    document.getElementById('ticket-id').innerText = "#" + ticketId;
                     document.getElementById('premio-text').innerText = docSnap.data().premio;
                 } else {
-                    showError("TICKET NO DISPONIBLE. Alguien más ya reclamó este premio.");
+                    showError("TICKET AGOTADO. Este código ya fue reclamado.");
                 }
             } catch (e) {
-                showError("ERROR DE CONEXIÓN. Revisa tu internet.");
+                showError("FALLO DE CONEXIÓN. Verifica tu internet.");
             }
         }
 
@@ -122,11 +155,15 @@
             const nombre = document.getElementById('nombre').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
             const tos = document.getElementById('tos').checked;
+            const btn = document.getElementById('btn-claim');
 
             if (!nombre || !telefono || !tos) {
-                alert("Por favor: Completa todos los campos y acepta los términos.");
+                alert("Completa todos los datos y acepta los términos.");
                 return;
             }
+
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> PROCESANDO...`;
 
             try {
                 const docRef = doc(db, "tickets", ticketId);
@@ -136,18 +173,19 @@
                     status: "reclamado",
                     fechaRegistro: new Date().toLocaleString()
                 });
-                alert("¡REGISTRADO CON ÉXITO! Toma captura de pantalla y ven a La Hielera con tu ticket físico.");
+                alert("¡ÉXITO! Tu premio ha sido reservado. Muestra esta pantalla en caja junto con tu ticket físico.");
                 location.reload();
             } catch (e) {
-                alert("Hubo un error al procesar el registro. Intenta de nuevo.");
+                alert("Error al registrar. Intenta de nuevo.");
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-trophy"></i> RECLAMAR MI PREMIO`;
             }
         };
 
         function showError(msg) {
             document.getElementById('loading').classList.add('hidden');
-            const errDiv = document.getElementById('error-message');
-            errDiv.innerText = msg;
-            errDiv.classList.remove('hidden');
+            document.getElementById('error-text').innerText = msg;
+            document.getElementById('error-message').classList.remove('hidden');
         }
 
         init();
