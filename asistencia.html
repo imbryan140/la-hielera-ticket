@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Asistencias | La Hielera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body class="bg-[#0a0a0a] text-white p-6 md:p-10 font-sans">
+    <div class="max-w-6xl mx-auto">
+        
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+            <div class="text-center md:text-left">
+                <h1 class="text-4xl font-black italic uppercase italic tracking-tighter text-white">Flujo de Clientes</h1>
+                <p id="contador" class="text-orange-500 font-bold text-lg mt-1 uppercase tracking-widest">Total: 0 personas</p>
+            </div>
+            
+            <button onclick="descargarExcel()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-2xl transition flex items-center gap-2 shadow-lg shadow-green-900/20">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                DESCARGAR CIERRE DEL DÍA (EXCEL)
+            </button>
+        </div>
+
+        <div class="bg-[#141414] rounded-[2rem] overflow-hidden border border-gray-800 shadow-2xl">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-[#1f1f1f] text-[10px] uppercase text-gray-500 tracking-widest border-b border-gray-800">
+                    <tr>
+                        <th class="p-5">Fecha / Hora</th>
+                        <th class="p-5">Nombre Completo</th>
+                        <th class="p-5">WhatsApp</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-asistencias" class="divide-y divide-gray-800 text-sm">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6y3u_6pmJkYm0tb3awnhrmWsgJrouUOQ",
+            authDomain: "la-hielera-ticket.firebaseapp.com",
+            projectId: "la-hielera-ticket",
+            storageBucket: "la-hielera-ticket.firebasestorage.app",
+            messagingSenderId: "1027341293744",
+            appId: "1:1027341293744:web:186bf82f009f9a7270c375"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let datosParaExcel = [];
+
+        const q = query(collection(db, "asistencias"), orderBy("timestamp", "desc"));
+
+        onSnapshot(q, (snapshot) => {
+            const list = document.getElementById('lista-asistencias');
+            document.getElementById('contador').innerText = `Total: ${snapshot.size} personas registradas`;
+            list.innerHTML = "";
+            datosParaExcel = []; // Reiniciamos el array para el Excel
+            
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                
+                // Guardamos en el array para el Excel con nombres de columna limpios
+                datosParaExcel.push({
+                    "FECHA": d.fecha,
+                    "HORA": d.hora,
+                    "NOMBRE": d.nombre,
+                    "APELLIDO": d.apellido,
+                    "WHATSAPP": d.telefono
+                });
+
+                list.innerHTML += `
+                <tr class="hover:bg-[#1c1c1c] transition-colors">
+                    <td class="p-5 text-gray-500 font-mono text-xs">${d.fecha} <br> <span class="text-orange-900">${d.hora}</span></td>
+                    <td class="p-5 font-bold uppercase tracking-tight text-white">${d.nombre} ${d.apellido}</td>
+                    <td class="p-5">
+                        <a href="https://wa.me/${d.telefono}" target="_blank" class="text-orange-500 font-bold hover:underline">${d.telefono}</a>
+                    </td>
+                </tr>`;
+            });
+        });
+
+        // Función para generar y descargar el archivo Excel
+        window.descargarExcel = () => {
+            if (datosParaExcel.length === 0) return alert("No hay datos para exportar.");
+
+            const fechaHoy = new Date().toLocaleDateString().replace(/\//g, '-');
+            const worksheet = XLSX.utils.json_to_sheet(datosParaExcel);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Asistencias");
+
+            // Descargar el archivo
+            XLSX.writeFile(workbook, `Cierre_LaHielera_${fechaHoy}.xlsx`);
+        };
+    </script>
+</body>
+</html>
