@@ -69,10 +69,9 @@
         const db = getFirestore(app);
         let datosParaExcel = [];
 
-        // LÓGICA DE PIN
         window.verificarPIN = () => {
             const pin = document.getElementById('pin-input').value;
-            if(pin === "2026") { // AQUÍ CAMBIAS TU PIN
+            if(pin === "0505") {
                 document.getElementById('auth-overlay').style.display = 'none';
                 document.getElementById('main-content').classList.remove('hidden');
             } else {
@@ -109,3 +108,4 @@
                 list.innerHTML += `
                 <tr class="hover:bg-[#1c1c1c] transition-colors">
                     <td class="p-5 font-mono text-xs text-gray-400"><span class="${d.fecha ===
+
