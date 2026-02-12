@@ -17,6 +17,37 @@
         .hidden { display: none !important; }
         .stat-card { background: #111; border: 1px solid #222; padding: 1.25rem; border-radius: 1.5rem; text-align: center; transition: all 0.3s; }
         .stat-card:hover { border-color: #f97316; transform: translateY(-2px); }
+        
+        /* Estilo para el menú de exportación */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #1a1a1a;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            z-index: 50;
+            border: 1px solid #333;
+            border-radius: 1rem;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content button {
+            width: 100%;
+            padding: 12px 16px;
+            text-align: left;
+            color: #ccc;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+        .dropdown-content button:hover {
+            background-color: #262626;
+            color: #f97316;
+        }
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -39,40 +70,51 @@
                 <h1 class="text-3xl font-black uppercase italic tracking-tighter text-white">
                     <i class="fa-solid fa-chart-line text-orange-500 mr-2"></i>Control de Flujo
                 </h1>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1">Registro de Datos | BryanSYStem</p>
+                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1 text-center md:text-left">REGISTRO DE DATOS | BryanSYStem</p>
             </div>
-            <button id="btn-excel" class="bg-green-600 hover:bg-green-700 text-white font-black py-4 px-8 rounded-2xl transition flex items-center gap-3 shadow-lg shadow-green-900/20 text-xs uppercase tracking-widest">
-                <i class="fa-solid fa-file-excel text-lg"></i> Exportar Cierre
-            </button>
+
+            <div class="dropdown relative">
+                <button class="bg-green-600 hover:bg-green-700 text-white font-black py-4 px-8 rounded-2xl transition flex items-center gap-3 shadow-lg shadow-green-900/20 text-xs uppercase tracking-widest">
+                    <i class="fa-solid fa-file-export text-lg"></i> Reporte Excel <i class="fa-solid fa-chevron-down ml-2"></i>
+                </button>
+                <div class="dropdown-content animate-in">
+                    <button onclick="exportarExcel('hoy')"><i class="fa-solid fa-bolt mr-2"></i> Reporte de Hoy</button>
+                    <button onclick="exportarExcel('semana')"><i class="fa-solid fa-calendar-week mr-2"></i> De la Semana</button>
+                    <button onclick="exportarExcel('mes')"><i class="fa-solid fa-calendar-days mr-2"></i> Del Mes</button>
+                    <button onclick="exportarExcel('año')"><i class="fa-solid fa-calendar mr-2"></i> Del Año</button>
+                    <div class="border-t border-gray-800"></div>
+                    <button onclick="exportarExcel('todo')" class="text-orange-500"><i class="fa-solid fa-database mr-2"></i> Histórico Total</button>
+                </div>
+            </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 text-center">
             <div class="stat-card border-orange-500/40 bg-orange-500/5">
-                <p class="text-[10px] uppercase text-orange-500 font-black mb-1"><i class="fa-solid fa-bolt mr-1"></i> Hoy</p>
+                <p class="text-[10px] uppercase text-orange-500 font-black mb-1">Hoy</p>
                 <p id="count-hoy" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1"><i class="fa-solid fa-calendar-week mr-1"></i> Semana</p>
+                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Semana</p>
                 <p id="count-semana" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1"><i class="fa-solid fa-calendar-days mr-1"></i> Mes</p>
+                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Mes</p>
                 <p id="count-mes" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1"><i class="fa-solid fa-calendar mr-1"></i> Año</p>
+                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Año</p>
                 <p id="count-año" class="text-4xl font-black">0</p>
             </div>
             <div class="stat-card bg-white text-black border-none">
-                <p class="text-[10px] uppercase font-black mb-1"><i class="fa-solid fa-database mr-1"></i> Histórico</p>
+                <p class="text-[10px] uppercase font-black mb-1">Histórico</p>
                 <p id="count-total" class="text-4xl font-black">0</p>
             </div>
         </div>
 
         <div class="mb-6 relative group">
             <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-orange-500 transition-colors"></i>
-            <input type="text" id="buscador" placeholder="Buscar por nombre, apellido o cédula de identidad..." 
-                class="w-full bg-[#111] border border-gray-800 text-white text-sm rounded-2xl py-5 pl-14 pr-6 outline-none focus:border-orange-500 transition-all shadow-2xl">
+            <input type="text" id="buscador" placeholder="Buscar por nombre, apellido o cédula..." 
+                class="w-full bg-[#111] border border-gray-800 text-white text-sm rounded-2xl py-5 pl-14 pr-6 outline-none focus:border-orange-500 transition-all">
         </div>
 
         <div class="bg-matte rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-800">
@@ -80,10 +122,10 @@
                 <table class="w-full text-left border-collapse">
                     <thead class="bg-[#1a1a1a] text-[10px] uppercase text-gray-400 tracking-[0.2em] border-b border-gray-800">
                         <tr>
-                            <th class="p-6"><i class="fa-regular fa-clock mr-2"></i>Registro</th>
-                            <th class="p-6"><i class="fa-regular fa-id-card mr-2"></i>Cédula</th>
-                            <th class="p-6"><i class="fa-regular fa-user mr-2"></i>Cliente</th>
-                            <th class="p-6"><i class="fa-brands fa-whatsapp mr-2 text-green-500"></i>WhatsApp</th>
+                            <th class="p-6">Registro</th>
+                            <th class="p-6">Cédula</th>
+                            <th class="p-6">Cliente</th>
+                            <th class="p-6">WhatsApp</th>
                         </tr>
                     </thead>
                     <tbody id="lista-asistencias" class="divide-y divide-gray-800 text-sm"></tbody>
@@ -108,40 +150,31 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         let todosLosRegistros = [];
-        let datosExcelRaw = [];
 
         // LÓGICA DE PIN
-        const btnEntrar = document.getElementById('btn-entrar');
-        const pinInput = document.getElementById('pin-input');
-
         const acceso = () => {
-            if(pinInput.value === "1234") {
+            if(document.getElementById('pin-input').value === "1234") {
                 document.getElementById('auth-overlay').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
             } else { 
                 alert("PIN INCORRECTO");
-                pinInput.value = "";
+                document.getElementById('pin-input').value = "";
             }
         };
-
-        btnEntrar.onclick = acceso;
-        pinInput.onkeypress = (e) => { if(e.key === 'Enter') acceso(); };
+        document.getElementById('btn-entrar').onclick = acceso;
+        document.getElementById('pin-input').onkeypress = (e) => { if(e.key === 'Enter') acceso(); };
 
         // FIREBASE DATA
         const q = query(collection(db, "asistencias"), orderBy("timestamp", "desc"));
-
         onSnapshot(q, (snapshot) => {
             todosLosRegistros = [];
             const ahora = new Date();
             let h=0, s=0, m=0, a=0;
-
+            const hoyStr = ahora.toLocaleDateString();
+            
             const inicioSemana = new Date(ahora);
             inicioSemana.setDate(ahora.getDate() - ahora.getDay());
             inicioSemana.setHours(0,0,0,0);
-
-            const hoyStr = new Date().toLocaleDateString();
-            const mesAct = ahora.getMonth();
-            const añoAct = ahora.getFullYear();
 
             snapshot.forEach(doc => {
                 const d = doc.data();
@@ -149,10 +182,10 @@
                 
                 if(d.fecha === hoyStr) h++;
                 if(fechaDoc >= inicioSemana) s++;
-                if(fechaDoc.getMonth() === mesAct && fechaDoc.getFullYear() === añoAct) m++;
-                if(fechaDoc.getFullYear() === añoAct) a++;
+                if(fechaDoc.getMonth() === ahora.getMonth() && fechaDoc.getFullYear() === ahora.getFullYear()) m++;
+                if(fechaDoc.getFullYear() === ahora.getFullYear()) a++;
 
-                todosLosRegistros.push(d);
+                todosLosRegistros.push({...d, jsDate: fechaDoc});
             });
 
             document.getElementById('count-hoy').innerText = h;
@@ -160,60 +193,70 @@
             document.getElementById('count-mes').innerText = m;
             document.getElementById('count-año').innerText = a;
             document.getElementById('count-total').innerText = snapshot.size;
-            
             renderizarTabla(todosLosRegistros);
         });
 
         function renderizarTabla(regs) {
             const list = document.getElementById('lista-asistencias');
-            const hoy = new Date().toLocaleDateString();
             list.innerHTML = "";
-            datosExcelRaw = [];
-
             regs.forEach(d => {
-                datosExcelRaw.push([d.fecha, d.hora, d.cedula || "N/A", `${d.nombre} ${d.apellido}`, d.telefono]);
                 list.innerHTML += `
                 <tr class="hover:bg-[#1c1c1c] transition-all">
-                    <td class="p-6 font-mono text-[11px] text-gray-500">
-                        <span class="${d.fecha === hoy ? 'text-orange-500 font-black' : ''}">${d.fecha}</span><br>${d.hora}
-                    </td>
+                    <td class="p-6 font-mono text-[11px] text-gray-500"><b>${d.fecha}</b><br>${d.hora}</td>
                     <td class="p-6 font-mono text-gray-400">${d.cedula || "---"}</td>
                     <td class="p-6 font-black uppercase tracking-tight">${d.nombre} ${d.apellido}</td>
                     <td class="p-6 text-orange-500 font-bold">
-                        <a href="https://wa.me/${d.telefono.replace(/\+/g,'')}" target="_blank" class="hover:underline">
-                            ${d.telefono}
-                        </a>
+                        <a href="https://wa.me/${d.telefono.replace(/\D/g,'')}" target="_blank">${d.telefono}</a>
                     </td>
                 </tr>`;
             });
         }
 
-        // BUSCADOR EN TIEMPO REAL
+        // BUSCADOR
         document.getElementById('buscador').oninput = (e) => {
             const t = e.target.value.toLowerCase();
             const f = todosLosRegistros.filter(r => 
-                `${r.nombre} ${r.apellido}`.toLowerCase().includes(t) || 
-                (r.cedula && r.cedula.toString().includes(t))
+                `${r.nombre} ${r.apellido} ${r.cedula}`.toLowerCase().includes(t)
             );
             renderizarTabla(f);
         };
 
-        // EXCEL PROFESIONAL
-        document.getElementById('btn-excel').onclick = () => {
-            if(datosExcelRaw.length === 0) return alert("Sin datos");
+        // EXCEL DINÁMICO POR FILTROS
+        window.exportarExcel = (tipo) => {
+            const ahora = new Date();
+            let registrosFiltrados = [];
+            
+            if(tipo === 'hoy') {
+                const hoy = ahora.toLocaleDateString();
+                registrosFiltrados = todosLosRegistros.filter(r => r.fecha === hoy);
+            } else if(tipo === 'semana') {
+                const inicioSemana = new Date(ahora);
+                inicioSemana.setDate(ahora.getDate() - ahora.getDay());
+                inicioSemana.setHours(0,0,0,0);
+                registrosFiltrados = todosLosRegistros.filter(r => r.jsDate >= inicioSemana);
+            } else if(tipo === 'mes') {
+                registrosFiltrados = todosLosRegistros.filter(r => r.jsDate.getMonth() === ahora.getMonth() && r.jsDate.getFullYear() === ahora.getFullYear());
+            } else if(tipo === 'año') {
+                registrosFiltrados = todosLosRegistros.filter(r => r.jsDate.getFullYear() === ahora.getFullYear());
+            } else {
+                registrosFiltrados = todosLosRegistros;
+            }
+
+            if(registrosFiltrados.length === 0) return alert("No hay datos para este periodo.");
+
+            const dataFinal = registrosFiltrados.map(d => [d.fecha, d.hora, d.cedula || "N/A", `${d.nombre} ${d.apellido}`, d.telefono]);
+            
             const ws = XLSX.utils.aoa_to_sheet([
-                ["LA HIELERA - DASHBOARD ADMINISTRATIVO"],
-                [`REPORTE GENERADO EL: ${new Date().toLocaleString()}`],
+                ["LA HIELERA - REPORTE DE ASISTENCIAS"],
+                [`PERIODO: ${tipo.toUpperCase()} | GENERADO: ${ahora.toLocaleString()}`],
                 [],
                 ["FECHA", "HORA", "CÉDULA", "NOMBRE COMPLETO", "WHATSAPP"],
-                ...datosExcelRaw
+                ...dataFinal
             ]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Asistencias");
-            XLSX.writeFile(wb, `Cierre_Hielera_${new Date().toLocaleDateString()}.xlsx`);
+            XLSX.writeFile(wb, `Reporte_${tipo}_Hielera.xlsx`);
         };
     </script>
 </body>
 </html>
-
-
