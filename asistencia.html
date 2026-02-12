@@ -98,4 +98,190 @@
                     <button onclick="exportarExcel('mes')"><i class="fa-solid fa-calendar-days"></i> Este Mes</button>
                     <button onclick="exportarExcel('año')"><i class="fa-solid fa-calendar"></i> Todo el Año</button>
                     <div class="border-t border-gray-800 my-1"></div>
-                    <button onclick="exportarExcel('todo')" class="text-white bg-orange-500/5 hover:bg-orange-500/10"><i class="fa-solid fa-
+                    <button onclick="exportarExcel('todo')" class="text-white bg-orange-500/5 hover:bg-orange-500/10"><i class="fa-solid fa-database text-orange-500"></i> Histórico Completo</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div class="stat-card border-orange-500/40 bg-orange-500/5">
+                <p class="text-[10px] uppercase text-orange-500 font-black mb-1">Hoy</p>
+                <p id="count-hoy" class="text-4xl font-black">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[10px] uppercase text-gray-400 font-black mb-1">Semana</p>
+                <p id="count-semana" class="text-4xl font-black">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[10px] uppercase text-gray-400 font-black mb-1">Mes</p>
+                <p id="count-mes" class="text-4xl font-black">0</p>
+            </div>
+            <div class="stat-card">
+                <p class="text-[10px] uppercase text-gray-400 font-black mb-1">Año</p>
+                <p id="count-año" class="text-4xl font-black">0</p>
+            </div>
+            <div class="stat-card bg-white text-black border-none shadow-xl">
+                <p class="text-[10px] uppercase font-black mb-1">Total</p>
+                <p id="count-total" class="text-4xl font-black">0</p>
+            </div>
+        </div>
+
+        <div class="mb-6 relative group">
+            <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-orange-500 transition-colors"></i>
+            <input type="text" id="buscador" placeholder="Buscar por nombre, cédula..." 
+                class="w-full bg-[#111] border border-gray-800 text-white text-sm rounded-2xl py-5 pl-14 pr-6 outline-none focus:border-orange-500 transition-all shadow-inner">
+        </div>
+
+        <div class="bg-matte rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-800">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead class="bg-[#1a1a1a] text-[10px] uppercase text-gray-500 tracking-[0.25em] border-b border-gray-800">
+                        <tr>
+                            <th class="p-6">Fecha/Hora</th>
+                            <th class="p-6">Identificación</th>
+                            <th class="p-6">Cliente</th>
+                            <th class="p-6 text-right">Contacto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista-asistencias" class="divide-y divide-gray-800/50 text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6y3u_6pmJkYm0tb3awnhrmWsgJrouUOQ",
+            authDomain: "la-hielera-ticket.firebaseapp.com",
+            projectId: "la-hielera-ticket",
+            storageBucket: "la-hielera-ticket.firebasestorage.app",
+            messagingSenderId: "1027341293744",
+            appId: "1:1027341293744:web:186bf82f009f9a7270c375"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        let todosLosRegistros = [];
+
+        // LÓGICA DE PIN
+        const acceso = () => {
+            if(document.getElementById('pin-input').value === "1234") {
+                document.getElementById('auth-overlay').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+            } else { 
+                alert("PIN INCORRECTO");
+                document.getElementById('pin-input').value = "";
+            }
+        };
+        document.getElementById('btn-entrar').onclick = acceso;
+        document.getElementById('pin-input').onkeypress = (e) => { if(e.key === 'Enter') acceso(); };
+
+        // --- LÓGICA DE MENÚ CLICK ---
+        const dropdownBtn = document.getElementById('dropdownBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+
+        dropdownBtn.onclick = (e) => {
+            e.stopPropagation(); // Evita que se cierre al hacer click en el botón
+            dropdownMenu.classList.toggle('show');
+        };
+
+        // Cerrar si hace click fuera del menú
+        window.onclick = (e) => {
+            if (!dropdownMenu.contains(e.target) && !dropdownBtn.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        };
+
+        // FIREBASE DATA
+        const q = query(collection(db, "asistencias"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+            todosLosRegistros = [];
+            const ahora = new Date();
+            let h=0, s=0, m=0, a=0;
+            const hoyStr = ahora.toLocaleDateString();
+            
+            const inicioSemana = new Date(ahora);
+            inicioSemana.setDate(ahora.getDate() - ahora.getDay());
+            inicioSemana.setHours(0,0,0,0);
+
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                const fechaDoc = d.timestamp?.toDate() || new Date();
+                
+                if(d.fecha === hoyStr) h++;
+                if(fechaDoc >= inicioSemana) s++;
+                if(fechaDoc.getMonth() === ahora.getMonth() && fechaDoc.getFullYear() === ahora.getFullYear()) m++;
+                if(fechaDoc.getFullYear() === ahora.getFullYear()) a++;
+
+                todosLosRegistros.push({...d, jsDate: fechaDoc});
+            });
+
+            document.getElementById('count-hoy').innerText = h;
+            document.getElementById('count-semana').innerText = s;
+            document.getElementById('count-mes').innerText = m;
+            document.getElementById('count-año').innerText = a;
+            document.getElementById('count-total').innerText = snapshot.size;
+            renderizarTabla(todosLosRegistros);
+        });
+
+        function renderizarTabla(regs) {
+            const list = document.getElementById('lista-asistencias');
+            list.innerHTML = "";
+            regs.forEach(d => {
+                list.innerHTML += `
+                <tr class="hover:bg-[#1c1c1c] transition-all">
+                    <td class="p-6 font-mono text-[11px] text-gray-500"><b class="text-white">${d.fecha}</b><br>${d.hora}</td>
+                    <td class="p-6 font-mono text-gray-400 tracking-tighter italic">${d.cedula || "---"}</td>
+                    <td class="p-6 font-black uppercase tracking-tight text-white">${d.nombre} ${d.apellido}</td>
+                    <td class="p-6 text-right">
+                        <a href="https://wa.me/${d.telefono.replace(/\D/g,'')}" target="_blank" class="bg-green-500/10 text-green-500 px-4 py-2 rounded-lg text-xs font-black hover:bg-green-500 hover:text-white transition-all">
+                            <i class="fa-brands fa-whatsapp mr-1 text-sm"></i> CHAT
+                        </a>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        // BUSCADOR
+        document.getElementById('buscador').oninput = (e) => {
+            const t = e.target.value.toLowerCase();
+            const f = todosLosRegistros.filter(r => 
+                `${r.nombre} ${r.apellido} ${r.cedula}`.toLowerCase().includes(t)
+            );
+            renderizarTabla(f);
+        };
+
+        // EXCEL DINÁMICO
+        window.exportarExcel = (tipo) => {
+            dropdownMenu.classList.remove('show'); // Cerrar menú al exportar
+            const ahora = new Date();
+            let filtrados = [];
+            
+            if(tipo === 'hoy') filtrados = todosLosRegistros.filter(r => r.fecha === ahora.toLocaleDateString());
+            else if(tipo === 'semana') {
+                const start = new Date(ahora); start.setDate(ahora.getDate() - ahora.getDay()); start.setHours(0,0,0,0);
+                filtrados = todosLosRegistros.filter(r => r.jsDate >= start);
+            }
+            else if(tipo === 'mes') filtrados = todosLosRegistros.filter(r => r.jsDate.getMonth() === ahora.getMonth() && r.jsDate.getFullYear() === ahora.getFullYear());
+            else if(tipo === 'año') filtrados = todosLosRegistros.filter(r => r.jsDate.getFullYear() === ahora.getFullYear());
+            else filtrados = todosLosRegistros;
+
+            if(filtrados.length === 0) return alert("No hay datos");
+
+            const ws = XLSX.utils.aoa_to_sheet([
+                ["LA HIELERA - DASHBOARD"],
+                [`REPORTE: ${tipo.toUpperCase()} | ${ahora.toLocaleString()}`],
+                [],
+                ["FECHA", "HORA", "CÉDULA", "NOMBRE", "WHATSAPP"],
+                ...filtrados.map(d => [d.fecha, d.hora, d.cedula, `${d.nombre} ${d.apellido}`, d.telefono])
+            ]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Datos");
+            XLSX.writeFile(wb, `Hielera_${tipo}_${new Date().toISOString().slice(0,10)}.xlsx`);
+        };
+    </script>
+</body>
+</html>
