@@ -18,35 +18,49 @@
         .stat-card { background: #111; border: 1px solid #222; padding: 1.25rem; border-radius: 1.5rem; text-align: center; transition: all 0.3s; }
         .stat-card:hover { border-color: #f97316; transform: translateY(-2px); }
         
-        /* Estilo para el menú de exportación */
+        /* Dropdown Mejorado con Click */
         .dropdown-content {
-            display: none;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
             position: absolute;
             right: 0;
-            top: 100%;
+            top: 110%;
             background-color: #1a1a1a;
-            min-width: 200px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+            min-width: 220px;
+            box-shadow: 0px 10px 30px rgba(0,0,0,0.8);
             z-index: 50;
             border: 1px solid #333;
-            border-radius: 1rem;
-            margin-top: 0.5rem;
-            overflow: hidden;
+            border-radius: 1.25rem;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .dropdown:hover .dropdown-content { display: block; }
+
+        /* Clase activa controlada por JS */
+        .dropdown-content.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
         .dropdown-content button {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 20px;
             text-align: left;
-            color: #ccc;
-            font-size: 12px;
-            font-weight: bold;
+            color: #888;
+            font-size: 11px;
+            font-weight: 800;
             text-transform: uppercase;
+            letter-spacing: 0.05em;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
+
         .dropdown-content button:hover {
-            background-color: #262626;
+            background-color: #222;
             color: #f97316;
+            padding-left: 25px;
         }
     </style>
 </head>
@@ -55,7 +69,7 @@
     <div id="auth-overlay">
         <div class="bg-[#1a1a1a] p-8 rounded-3xl border border-gray-800 text-center shadow-2xl w-full max-w-xs">
             <div class="text-orange-500 text-4xl mb-4"><i class="fa-solid fa-shield-halved"></i></div>
-            <h2 class="text-white font-black uppercase tracking-widest mb-6 text-sm">Acceso Privado</h2>
+            <h2 class="text-white font-black uppercase tracking-widest mb-6 text-sm text-center">Acceso Privado</h2>
             <input type="password" id="pin-input" placeholder="****" class="bg-black border border-gray-700 p-4 rounded-xl text-center text-2xl tracking-[1rem] w-full mb-4 outline-none focus:border-orange-500 text-white transition-all">
             <button id="btn-entrar" class="block w-full bg-orange-500 text-black font-black py-4 rounded-xl hover:bg-orange-400 transition transform active:scale-95">
                 DESBLOQUEAR
@@ -66,197 +80,22 @@
     <div id="main-content" class="max-w-7xl mx-auto hidden">
         
         <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-            <div>
+            <div class="w-full md:w-auto text-center md:text-left">
                 <h1 class="text-3xl font-black uppercase italic tracking-tighter text-white">
                     <i class="fa-solid fa-chart-line text-orange-500 mr-2"></i>Control de Flujo
                 </h1>
-                <p class="text-gray-500 text-xs font-bold uppercase tracking-widest mt-1 text-center md:text-left">REGISTRO DE DATOS | BryanSYStem</p>
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-[0.3em] mt-1">Dashboard Administrativo | La Hielera</p>
             </div>
 
-            <div class="dropdown relative">
-                <button class="bg-green-600 hover:bg-green-700 text-white font-black py-4 px-8 rounded-2xl transition flex items-center gap-3 shadow-lg shadow-green-900/20 text-xs uppercase tracking-widest">
-                    <i class="fa-solid fa-file-export text-lg"></i> Reporte Excel <i class="fa-solid fa-chevron-down ml-2"></i>
+            <div class="relative w-full md:w-auto">
+                <button id="dropdownBtn" class="w-full md:w-auto bg-green-600 hover:bg-green-700 text-white font-black py-4 px-8 rounded-2xl transition flex items-center justify-center gap-3 shadow-lg shadow-green-900/20 text-xs uppercase tracking-widest">
+                    <i class="fa-solid fa-file-excel text-lg"></i> Exportar Reporte <i class="fa-solid fa-caret-down"></i>
                 </button>
-                <div class="dropdown-content animate-in">
-                    <button onclick="exportarExcel('hoy')"><i class="fa-solid fa-bolt mr-2"></i> Reporte de Hoy</button>
-                    <button onclick="exportarExcel('semana')"><i class="fa-solid fa-calendar-week mr-2"></i> De la Semana</button>
-                    <button onclick="exportarExcel('mes')"><i class="fa-solid fa-calendar-days mr-2"></i> Del Mes</button>
-                    <button onclick="exportarExcel('año')"><i class="fa-solid fa-calendar mr-2"></i> Del Año</button>
-                    <div class="border-t border-gray-800"></div>
-                    <button onclick="exportarExcel('todo')" class="text-orange-500"><i class="fa-solid fa-database mr-2"></i> Histórico Total</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8 text-center">
-            <div class="stat-card border-orange-500/40 bg-orange-500/5">
-                <p class="text-[10px] uppercase text-orange-500 font-black mb-1">Hoy</p>
-                <p id="count-hoy" class="text-4xl font-black">0</p>
-            </div>
-            <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Semana</p>
-                <p id="count-semana" class="text-4xl font-black">0</p>
-            </div>
-            <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Mes</p>
-                <p id="count-mes" class="text-4xl font-black">0</p>
-            </div>
-            <div class="stat-card">
-                <p class="text-[10px] uppercase text-gray-500 font-black mb-1">Año</p>
-                <p id="count-año" class="text-4xl font-black">0</p>
-            </div>
-            <div class="stat-card bg-white text-black border-none">
-                <p class="text-[10px] uppercase font-black mb-1">Histórico</p>
-                <p id="count-total" class="text-4xl font-black">0</p>
-            </div>
-        </div>
-
-        <div class="mb-6 relative group">
-            <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-orange-500 transition-colors"></i>
-            <input type="text" id="buscador" placeholder="Buscar por nombre, apellido o cédula..." 
-                class="w-full bg-[#111] border border-gray-800 text-white text-sm rounded-2xl py-5 pl-14 pr-6 outline-none focus:border-orange-500 transition-all">
-        </div>
-
-        <div class="bg-matte rounded-[2.5rem] overflow-hidden shadow-2xl border border-gray-800">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead class="bg-[#1a1a1a] text-[10px] uppercase text-gray-400 tracking-[0.2em] border-b border-gray-800">
-                        <tr>
-                            <th class="p-6">Registro</th>
-                            <th class="p-6">Cédula</th>
-                            <th class="p-6">Cliente</th>
-                            <th class="p-6">WhatsApp</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lista-asistencias" class="divide-y divide-gray-800 text-sm"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyD6y3u_6pmJkYm0tb3awnhrmWsgJrouUOQ",
-            authDomain: "la-hielera-ticket.firebaseapp.com",
-            projectId: "la-hielera-ticket",
-            storageBucket: "la-hielera-ticket.firebasestorage.app",
-            messagingSenderId: "1027341293744",
-            appId: "1:1027341293744:web:186bf82f009f9a7270c375"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        let todosLosRegistros = [];
-
-        // LÓGICA DE PIN
-        const acceso = () => {
-            if(document.getElementById('pin-input').value === "1234") {
-                document.getElementById('auth-overlay').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-            } else { 
-                alert("PIN INCORRECTO");
-                document.getElementById('pin-input').value = "";
-            }
-        };
-        document.getElementById('btn-entrar').onclick = acceso;
-        document.getElementById('pin-input').onkeypress = (e) => { if(e.key === 'Enter') acceso(); };
-
-        // FIREBASE DATA
-        const q = query(collection(db, "asistencias"), orderBy("timestamp", "desc"));
-        onSnapshot(q, (snapshot) => {
-            todosLosRegistros = [];
-            const ahora = new Date();
-            let h=0, s=0, m=0, a=0;
-            const hoyStr = ahora.toLocaleDateString();
-            
-            const inicioSemana = new Date(ahora);
-            inicioSemana.setDate(ahora.getDate() - ahora.getDay());
-            inicioSemana.setHours(0,0,0,0);
-
-            snapshot.forEach(doc => {
-                const d = doc.data();
-                const fechaDoc = d.timestamp?.toDate() || new Date();
                 
-                if(d.fecha === hoyStr) h++;
-                if(fechaDoc >= inicioSemana) s++;
-                if(fechaDoc.getMonth() === ahora.getMonth() && fechaDoc.getFullYear() === ahora.getFullYear()) m++;
-                if(fechaDoc.getFullYear() === ahora.getFullYear()) a++;
-
-                todosLosRegistros.push({...d, jsDate: fechaDoc});
-            });
-
-            document.getElementById('count-hoy').innerText = h;
-            document.getElementById('count-semana').innerText = s;
-            document.getElementById('count-mes').innerText = m;
-            document.getElementById('count-año').innerText = a;
-            document.getElementById('count-total').innerText = snapshot.size;
-            renderizarTabla(todosLosRegistros);
-        });
-
-        function renderizarTabla(regs) {
-            const list = document.getElementById('lista-asistencias');
-            list.innerHTML = "";
-            regs.forEach(d => {
-                list.innerHTML += `
-                <tr class="hover:bg-[#1c1c1c] transition-all">
-                    <td class="p-6 font-mono text-[11px] text-gray-500"><b>${d.fecha}</b><br>${d.hora}</td>
-                    <td class="p-6 font-mono text-gray-400">${d.cedula || "---"}</td>
-                    <td class="p-6 font-black uppercase tracking-tight">${d.nombre} ${d.apellido}</td>
-                    <td class="p-6 text-orange-500 font-bold">
-                        <a href="https://wa.me/${d.telefono.replace(/\D/g,'')}" target="_blank">${d.telefono}</a>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        // BUSCADOR
-        document.getElementById('buscador').oninput = (e) => {
-            const t = e.target.value.toLowerCase();
-            const f = todosLosRegistros.filter(r => 
-                `${r.nombre} ${r.apellido} ${r.cedula}`.toLowerCase().includes(t)
-            );
-            renderizarTabla(f);
-        };
-
-        // EXCEL DINÁMICO POR FILTROS
-        window.exportarExcel = (tipo) => {
-            const ahora = new Date();
-            let registrosFiltrados = [];
-            
-            if(tipo === 'hoy') {
-                const hoy = ahora.toLocaleDateString();
-                registrosFiltrados = todosLosRegistros.filter(r => r.fecha === hoy);
-            } else if(tipo === 'semana') {
-                const inicioSemana = new Date(ahora);
-                inicioSemana.setDate(ahora.getDate() - ahora.getDay());
-                inicioSemana.setHours(0,0,0,0);
-                registrosFiltrados = todosLosRegistros.filter(r => r.jsDate >= inicioSemana);
-            } else if(tipo === 'mes') {
-                registrosFiltrados = todosLosRegistros.filter(r => r.jsDate.getMonth() === ahora.getMonth() && r.jsDate.getFullYear() === ahora.getFullYear());
-            } else if(tipo === 'año') {
-                registrosFiltrados = todosLosRegistros.filter(r => r.jsDate.getFullYear() === ahora.getFullYear());
-            } else {
-                registrosFiltrados = todosLosRegistros;
-            }
-
-            if(registrosFiltrados.length === 0) return alert("No hay datos para este periodo.");
-
-            const dataFinal = registrosFiltrados.map(d => [d.fecha, d.hora, d.cedula || "N/A", `${d.nombre} ${d.apellido}`, d.telefono]);
-            
-            const ws = XLSX.utils.aoa_to_sheet([
-                ["LA HIELERA - REPORTE DE ASISTENCIAS"],
-                [`PERIODO: ${tipo.toUpperCase()} | GENERADO: ${ahora.toLocaleString()}`],
-                [],
-                ["FECHA", "HORA", "CÉDULA", "NOMBRE COMPLETO", "WHATSAPP"],
-                ...dataFinal
-            ]);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Asistencias");
-            XLSX.writeFile(wb, `Reporte_${tipo}_Hielera.xlsx`);
-        };
-    </script>
-</body>
-</html>
+                <div id="dropdownMenu" class="dropdown-content">
+                    <button onclick="exportarExcel('hoy')"><i class="fa-solid fa-bolt text-orange-500"></i> Registros de Hoy</button>
+                    <button onclick="exportarExcel('semana')"><i class="fa-solid fa-calendar-week"></i> Esta Semana</button>
+                    <button onclick="exportarExcel('mes')"><i class="fa-solid fa-calendar-days"></i> Este Mes</button>
+                    <button onclick="exportarExcel('año')"><i class="fa-solid fa-calendar"></i> Todo el Año</button>
+                    <div class="border-t border-gray-800 my-1"></div>
+                    <button onclick="exportarExcel('todo')" class="text-white bg-orange-500/5 hover:bg-orange-500/10"><i class="fa-solid fa-
